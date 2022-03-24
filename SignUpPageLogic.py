@@ -9,6 +9,8 @@ class SignUpPageLogic:
     def __init__(self,Ui):
         self.ui = Ui
         self.idCheckFlag = False
+
+        
         self.ui.signUpBtnList[0].clicked.connect(lambda event: self.signUpSeq(event))
         self.ui.signUpBtnList[1].clicked.connect(lambda event: self.idCheck(event))
         self.ui.signUpBtnList[2].clicked.connect(lambda event: self.showSignIn(event))

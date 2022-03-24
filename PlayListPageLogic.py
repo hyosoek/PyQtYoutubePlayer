@@ -1,5 +1,4 @@
 import sys
-#from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QSize
 from Ui import *
@@ -16,11 +15,13 @@ class PlayListPageLogic(QWidget):
         self.playListDelBtnList = []
         self.playListLabelList = []
         db = DataBase()
-        playListData = db.dataRead("playlist","usercode",self.usercode)
-        for i in range(0,len(playListData)):
-            self.addPlayList(playListData[i][1])
-        userData = db.dataRead("user","usercode",self.usercode)
-        self.ui.playListidLabel.setText(userData[0][0]+"님 환영합니다!")
+        self.playListData = db.dataRead("playlist","usercode",self.usercode)
+        self.userData = db.dataRead("user","usercode",self.usercode)
+
+        for i in range(0,len(self.playListData)):
+            self.addPlayList(self.playListData[i][1])
+
+        self.ui.playListidLabel.setText(self.userData[0][0]+"님 환영합니다!")
 
 
         self.ui.playListBtnList[0].clicked.connect(lambda event: self.showSignIn(event))
@@ -29,14 +30,20 @@ class PlayListPageLogic(QWidget):
 
 
     def addPlayListSeq(self,event):
-        db = DataBase()
+        db = DataBase() #data create에 필요
+        namecheck = False
         playListName, ok = QInputDialog.getText(self, 'Add PlayList', "PlayList's Name")
-        #한 유저 내 playList 중복체크 기능이 필요합니다.
         if ok:
-            colTemp = ("usercode","playlistname")
-            dataTemp = (self.usercode,playListName)
-            db.dataCreate("playlist",colTemp,dataTemp)
-            self.addPlayList(playListName)
+            for i in range(0,len(self.playListData)):
+                if  self.playListData[0][1] == playListName:
+                    namecheck = True
+            if namecheck == False:
+                colTemp = ("usercode","playlistname")
+                dataTemp = (self.usercode,playListName)
+                db.dataCreate("playlist",colTemp,dataTemp)
+                self.addPlayList(playListName)
+            else:
+                pass
 
 
 
@@ -46,11 +53,10 @@ class PlayListPageLogic(QWidget):
         playListBtn.setFixedHeight(100)
         playListBtn.setStyleSheet("background-color : rgb(30,30,30);\n"
                 "border-radius: 8px;\n")
-        db = DataBase()
-        playlistData = db.dataRead("playlist","usercode",self.usercode) #유저코드 조회
-        for i in range(0,len(playlistData)): #플레이리스트 조회
-            if(playlistData[i][1] == playListName):
-                playlistcode = playlistData[i][2] #플레이리스트 코드 저장
+        
+        for i in range(0,len(self.playListData)): #플레이리스트 조회
+            if(self.playlistData[i][1] == playListName):
+                playlistcode = self.playlistData[i][2] #플레이리스트 코드 저장
         
         playListBtn.mouseReleaseEvent = lambda event: self.showVideoPage(event,playlistcode) 
 
@@ -76,16 +82,13 @@ class PlayListPageLogic(QWidget):
 
 
     def removePlayList(self,event,playListName):
-        db = DataBase()
-        playListDataTemp = db.dataRead("playlist","usercode",self.usercode)
-        for i in range(0,len(playListDataTemp)):
-            if playListDataTemp[i][1] == playListName:
-                playListCode = playListDataTemp[i][2]
-        videoDataTemp = db.dataRead("video","playlistcode",playListCode)
+        db = DataBase
+        for i in range(0,len(self.playListData)):
+            if self.playListData[i][1] == playListName:
+                playListCode = self.playListData[i][2]
+        videoDataTemp = db.dataRead("video","playlistcode",playListCode) #앞에서 호출하나 뒤에서 호출하나 한번함.
         for i in range(0,len(videoDataTemp)):
-            db.dataDelete("video","videocode",videoDataTemp[i][2])
-
-        
+            db.dataDelete("video","videocode",videoDataTemp[i][2]) #어차피 삭제해야함
         db.dataDelete("playlist","playlistcode",playListCode)
 
         for i in range(0,len(self.playListLabelList)):
@@ -99,12 +102,9 @@ class PlayListPageLogic(QWidget):
         del self.playListLabelList[delIndex]
         
 
-
-
     def showVideoPage(self,event,playListCode):
         self.videoPage = VideoPageLogic(self.ui,playListCode)
         self.ui.stackedWidget.setCurrentIndex(3)
-
 
 
     def showSignIn(self,event):
