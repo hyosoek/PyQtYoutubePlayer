@@ -9,7 +9,6 @@ class PlayListPageLogic(QWidget):
     def __init__(self,Ui,usercode):
         super().__init__()
         self.ui = Ui
-        
         self.usercode = usercode
         self.playListBtnList = []
         self.playListDelBtnList = []
@@ -19,7 +18,8 @@ class PlayListPageLogic(QWidget):
         self.userData = db.dataRead("user","usercode",self.usercode)
 
         for i in range(0,len(self.playListData)):
-            self.addPlayList(self.playListData[i][1])
+            self.addPlayList(self.playListData[i][2])
+            pass
 
         self.ui.playListidLabel.setText(self.userData[0][0]+"님 환영합니다!")
 
@@ -30,49 +30,50 @@ class PlayListPageLogic(QWidget):
 
 
     def addPlayListSeq(self,event):
-        db = DataBase() #data create에 필요
-        namecheck = False
-        playListName, ok = QInputDialog.getText(self, 'Add PlayList', "PlayList's Name")
-        if ok:
-            for i in range(0,len(self.playListData)):
-                if  self.playListData[0][1] == playListName:
-                    namecheck = True
-            if namecheck == False:
-                colTemp = ("usercode","playlistname")
-                dataTemp = (self.usercode,playListName)
-                db.dataCreate("playlist",colTemp,dataTemp)
-                self.addPlayList(playListName)
-            else:
+        # db = DataBase() #data create에 필요
+        # namecheck = False
+        # playListName, ok = QInputDialog.getText(self, 'Add PlayList', "PlayList's Name")
+        # if ok:
+        #     for i in range(0,len(self.playListData)):
+        #         if  self.playListData[0][1] == playListName:
+        #             namecheck = True
+        #     if namecheck == False:
+        #         colTemp = ("usercode","playlistname")
+        #         dataTemp = (self.usercode,playListName)
+        #         db.dataCreate("playlist",colTemp,dataTemp)
+        #         self.addPlayList(playListName)
+        #     else:
                 pass
 
 
 
-    def addPlayList(self,playListName):
+    def addPlayList(self,playListCode):
+
         playListBtn = QtWidgets.QWidget()
         playListBtn.setFixedWidth(500)
         playListBtn.setFixedHeight(100)
         playListBtn.setStyleSheet("background-color : rgb(30,30,30);\n"
                 "border-radius: 8px;\n")
-        
-        for i in range(0,len(self.playListData)): #플레이리스트 조회
-            if(self.playlistData[i][1] == playListName):
-                playlistcode = self.playlistData[i][2] #플레이리스트 코드 저장
-        
-        playListBtn.mouseReleaseEvent = lambda event: self.showVideoPage(event,playlistcode) 
+        playListBtn.setObjectName(str(playListCode))
+        playListBtn.mouseReleaseEvent = lambda event: self.showVideoPage(event,playListCode) 
 
         playListLabel = QtWidgets.QLabel(playListBtn)
         playListLabel.setGeometry(QtCore.QRect(210, 25, 100, 50))
         playListLabel.setStyleSheet("background-color : rgb(30,30,30);\n"
                 "color : white;\n"
                 "font-size: 25pt;")
-        playListLabel.setText(playListName)
+        for i in range(0,len(self.playListData)):
+            if self.playListData[i][2] == playListCode:
+                playListLabel.setText(self.playListData[i][1])
 
-        delBtn = QtWidgets.QWidget(playListBtn)
+        delBtn = QtWidgets.QLabel(playListBtn)
         delBtn.setGeometry(QtCore.QRect(450, 10, 40, 80))
-        delBtn.setStyleSheet("background-color : rgb(80,80,80);\n")
-        
-        #delBtn.mouseReleaseEvent = lambda event, playListName_ = playListName: self.removePlayList(event,playListName_)
-        delBtn.mouseReleaseEvent = lambda event: self.removePlayList(event,playListName)#등록당시의 버튼 크기가 아닌 것으로 등록됨
+        delBtn.setStyleSheet("background-color : rgb(80,80,80);\n"
+        " font-size : 30pt;\n"
+        " color : white;\n"
+        "padding-left : 4px;")
+        delBtn.setText("X")
+        delBtn.mouseReleaseEvent = lambda event, code = playListCode: self.removePlayList(event,code)#등록당시의 버튼 크기가 아닌 것으로 등록됨
 
         self.ui.playListVbox.addWidget(playListBtn)
         self.playListBtnList.append(playListBtn)
@@ -81,18 +82,15 @@ class PlayListPageLogic(QWidget):
 
 
 
-    def removePlayList(self,event,playListName):
-        db = DataBase
-        for i in range(0,len(self.playListData)):
-            if self.playListData[i][1] == playListName:
-                playListCode = self.playListData[i][2]
-        videoDataTemp = db.dataRead("video","playlistcode",playListCode) #앞에서 호출하나 뒤에서 호출하나 한번함.
+    def removePlayList(self,event,playListCode):
+        db = DataBase()
+        videoDataTemp = db.dataRead("playlist","usercode",self.usercode)
         for i in range(0,len(videoDataTemp)):
             db.dataDelete("video","videocode",videoDataTemp[i][2]) #어차피 삭제해야함
         db.dataDelete("playlist","playlistcode",playListCode)
 
         for i in range(0,len(self.playListLabelList)):
-            if (self.playListLabelList[i].text() == playListName):
+            if (self.playListBtnList[i].objectName() == str(playListCode)):
                 delIndex = i
         self.playListDelBtnList[delIndex].deleteLater()
         del self.playListDelBtnList[delIndex]
