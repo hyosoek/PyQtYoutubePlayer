@@ -5,6 +5,8 @@ from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QImage, QPixmap
 import requests
 
+from NewWindow import *
+
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -75,9 +77,7 @@ class Ui(QtWidgets.QMainWindow):
         logoImage.setIcon(icon)
         logoImage.setIconSize(QtCore.QSize(250, 250))
 
-        
-        
-         
+
 
     def signUpPageUi(self):
         self.signUpBtnList = []
@@ -108,6 +108,7 @@ class Ui(QtWidgets.QMainWindow):
         signUpBackBtn.setText("< Back")
         self.signUpBtnList.append(signUpBackBtn)   
         
+
 
         self.signUpLineEditList = []
         lineEdit = QtWidgets.QLineEdit(self.pageList[1])
@@ -154,7 +155,6 @@ class Ui(QtWidgets.QMainWindow):
             "font-size: 13pt;")
          
     
-
 
     def playListPageUi(self):
 

@@ -13,7 +13,7 @@ class SignUpPageLogic:
         
         self.ui.signUpBtnList[0].clicked.connect(lambda event: self.signUpSeq(event))
         self.ui.signUpBtnList[1].clicked.connect(lambda event: self.idCheck(event))
-        self.ui.signUpBtnList[2].clicked.connect(lambda event: self.showSignIn(event))
+        self.ui.signUpBtnList[2].clicked.connect(lambda event: self.goToSignIn(event))
 
     def idCheck(self,event):
         db = DataBase()
@@ -43,18 +43,18 @@ class SignUpPageLogic:
             mb.setStyleSheet("color: white;")
             mb.setText("가입을 환영합니다!")
             mb.show()
-            self.showSignIn(auto)
-
+            self.showSignIn()
         else:
             self.ui.signUpCheckLabel.setText("Wrong!")
 
+    def goToSignIn(self,event):
+        self.showSignIn()
 
-    def showSignIn(self,event):
+    def showSignIn(self):
         self.ui.signUpLineEditList[0].setDisabled(False)
         self.ui.idCheckLabel.setText("")
         self.ui.signUpCheckLabel.setText("")
         for i in range(0,4):
             self.ui.signUpLineEditList[i].setText("")
-
         self.ui.stackedWidget.setCurrentIndex(0)
         self.ui.signUpBtnList[2].disconnect()

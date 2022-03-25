@@ -4,10 +4,12 @@ from PyQt5.QtCore import Qt, QSize
 from Ui import *
 from DataBase import *
 from VideoPageLogic import *
+from NewWindow import *
 
 class PlayListPageLogic(QWidget):
     def __init__(self,Ui,usercode):
         super().__init__()
+        
         self.ui = Ui
         self.usercode = usercode
         self.playListBtnList = []
@@ -29,7 +31,7 @@ class PlayListPageLogic(QWidget):
               
 
 
-    def addPlayListSeq(self,event):
+    #def addPlayListSeq(self,event):
         # db = DataBase() #data create에 필요
         # namecheck = False
         # playListName, ok = QInputDialog.getText(self, 'Add PlayList', "PlayList's Name")
@@ -43,7 +45,11 @@ class PlayListPageLogic(QWidget):
         #         db.dataCreate("playlist",colTemp,dataTemp)
         #         self.addPlayList(playListName)
         #     else:
-                pass
+                
+    def addPlayListSeq(self,event):
+        self.newWindow = NewWindow()
+        self.newWindow.show()
+
 
 
 
@@ -80,7 +86,8 @@ class PlayListPageLogic(QWidget):
         self.playListDelBtnList.append(delBtn)
         self.playListLabelList.append(playListLabel)
 
-
+    def removeSeq(self,event): #물어보는 부분
+        pass
 
     def removePlayList(self,event,playListCode):
         db = DataBase()
@@ -88,7 +95,6 @@ class PlayListPageLogic(QWidget):
         for i in range(0,len(videoDataTemp)):
             db.dataDelete("video","videocode",videoDataTemp[i][2]) #어차피 삭제해야함
         db.dataDelete("playlist","playlistcode",playListCode)
-
         for i in range(0,len(self.playListLabelList)):
             if (self.playListBtnList[i].objectName() == str(playListCode)):
                 delIndex = i
