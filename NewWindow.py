@@ -1,3 +1,4 @@
+from re import S
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QSize
@@ -8,12 +9,72 @@ from VideoPageLogic import *
 
 class NewWindow(QWidget):
     def __init__(self):
-         super(NewWindow, self).__init__()
-         self.resize(400, 300)
+        super(NewWindow, self).__init__()
+        self.setGeometry(600,400,400,300)
+        self.setStyleSheet("background-color : black;")
+        
 
-         # Label
-         self.label = QLabel(self)
-         self.label.setGeometry(0, 0, 400, 300)
-         self.label.setText('Sub Window')
-         self.label.setAlignment(Qt.AlignCenter)
-         self.label.setStyleSheet('font-size:40px')
+    def addPlayList(self):
+        self.explainLabel = QLabel(self)
+        self.explainLabel.setGeometry(70,80,320,16)
+        self.explainLabel.setStyleSheet("color : white;\n"
+            "font-size : 16pt;")
+        self.explainLabel.setText("Input PlayList's Name what yo want")
+
+        self.playListNameInput = QLineEdit(self)
+        self.playListNameInput.setGeometry(20,110,360,30)
+        self.playListNameInput.setStyleSheet("background-color : rgb(20,20,20);\n"
+            "color : white;\n"
+            "padding-left: 5px;\n"
+            "border-radius: 1px;\n")
+
+        self.explainLabel = QLabel(self)
+        self.explainLabel.setGeometry(330,145,60,16)
+        self.explainLabel.setStyleSheet("color : red;\n"
+            "font-size : 16pt;")
+        
+        self.cancelBtn = QPushButton(self)
+        self.cancelBtn.setGeometry(95,170,100,50)
+        self.cancelBtn.setStyleSheet("background-color : rgb(60,60,60);\n"
+            "border-radius: 10px;\n"
+            "color : white;\n"
+            "font-size : 20pt;")
+        self.cancelBtn.setText("Cancel")
+
+        self.enrollBtn = QPushButton(self)  
+        self.enrollBtn.setGeometry(205,170,100,50)
+        self.enrollBtn.setStyleSheet("background-color : rgb(220,0,0);\n"
+            "border-radius: 10px;\n"
+            "color : white;\n"
+            "font-size : 20pt;")
+        self.enrollBtn.setText("Enroll")
+
+
+    def addVideo(self):
+        self.addPlayList()
+        self.explainLabel.setText("Input YouTube's URL what yo want")
+        
+
+    def delConfirm(self):
+        self.explainLabel = QLabel(self)
+        self.explainLabel.setGeometry(100,100,320,16)
+        self.explainLabel.setStyleSheet("color : white;\n"
+            "font-size : 16pt;")
+        self.explainLabel.setText("You really want to Delete?")
+
+        self.noBtn = QPushButton(self)
+        self.noBtn.setGeometry(95,150,100,50)
+        self.noBtn.setStyleSheet("background-color : rgb(60,60,60);\n"
+            "border-radius: 10px;\n"
+            "color : white;\n"
+            "font-size : 20pt;")
+        self.noBtn.setText("No")
+
+        self.yesBtn = QPushButton(self)  
+        self.yesBtn.setGeometry(205,150,100,50)
+        self.yesBtn.setStyleSheet("background-color : rgb(220,0,0);\n"
+            "border-radius: 10px;\n"
+            "color : white;\n"
+            "font-size : 20pt;")
+        self.yesBtn.setText("Yes")
+

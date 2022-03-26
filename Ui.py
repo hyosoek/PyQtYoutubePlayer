@@ -5,8 +5,6 @@ from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QImage, QPixmap
 import requests
 
-from NewWindow import *
-
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()

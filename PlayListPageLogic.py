@@ -21,8 +21,7 @@ class PlayListPageLogic(QWidget):
 
         for i in range(0,len(self.playListData)):
             self.addPlayList(self.playListData[i][2])
-            pass
-
+            
         self.ui.playListidLabel.setText(self.userData[0][0]+"님 환영합니다!")
 
 
@@ -31,26 +30,27 @@ class PlayListPageLogic(QWidget):
               
 
 
-    #def addPlayListSeq(self,event):
-        # db = DataBase() #data create에 필요
-        # namecheck = False
-        # playListName, ok = QInputDialog.getText(self, 'Add PlayList', "PlayList's Name")
-        # if ok:
-        #     for i in range(0,len(self.playListData)):
-        #         if  self.playListData[0][1] == playListName:
-        #             namecheck = True
-        #     if namecheck == False:
-        #         colTemp = ("usercode","playlistname")
-        #         dataTemp = (self.usercode,playListName)
-        #         db.dataCreate("playlist",colTemp,dataTemp)
-        #         self.addPlayList(playListName)
-        #     else:
-                
     def addPlayListSeq(self,event):
-        self.newWindow = NewWindow()
-        self.newWindow.show()
-
-
+        db = DataBase() #data create에 필요
+        namecheck = False
+        playListName, ok = QInputDialog.getText(self, 'Add PlayList', "PlayList's Name")
+        if ok:
+            for i in range(0,len(self.playListData)):
+                if  self.playListData[0][1] == playListName:
+                    namecheck = True
+            if namecheck == False:
+                colTemp = ("usercode","playlistname")
+                dataTemp = (self.usercode,playListName)
+                db.dataCreate("playlist",colTemp,dataTemp)
+                self.addPlayList(playListName)
+            else:
+                pass
+                
+    # def addPlayListSeq(self,event):
+    #     self.newWindow = NewWindow()
+    #     self.newWindow.addPlayList()
+    #     self.newWindow.show()
+        #db add해주고, playListData도 데이터 한번 업데이트 해주기
 
 
     def addPlayList(self,playListCode):
@@ -86,14 +86,14 @@ class PlayListPageLogic(QWidget):
         self.playListDelBtnList.append(delBtn)
         self.playListLabelList.append(playListLabel)
 
-    def removeSeq(self,event): #물어보는 부분
-        pass
+    def removeSeq(self,event,code): #물어보는 부분
+        self.newWindow = NewWindow()
+        self.newWindow.delConfirm()
+        self.newWindow.show()
 
     def removePlayList(self,event,playListCode):
         db = DataBase()
-        videoDataTemp = db.dataRead("playlist","usercode",self.usercode)
-        for i in range(0,len(videoDataTemp)):
-            db.dataDelete("video","videocode",videoDataTemp[i][2]) #어차피 삭제해야함
+        db.dataDelete("video","playlistcode",playListCode) #어차피 삭제해야함
         db.dataDelete("playlist","playlistcode",playListCode)
         for i in range(0,len(self.playListLabelList)):
             if (self.playListBtnList[i].objectName() == str(playListCode)):
@@ -107,7 +107,7 @@ class PlayListPageLogic(QWidget):
         
 
     def showVideoPage(self,event,playListCode):
-        self.videoPage = VideoPageLogic(self.ui,playListCode)
+        self.videoPage = VideoPageLogic(self.ui,playListCode,self.userData[0][0])
         self.ui.stackedWidget.setCurrentIndex(3)
 
 

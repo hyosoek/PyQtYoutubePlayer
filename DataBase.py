@@ -37,15 +37,24 @@ class DataBase:
         self.con.commit()
         
     def dataRead(self,tableName,dataCol,data):
-        sentence = "SELECT * FROM "
-        sentence += str(tableName)
-        sentence += " WHERE "
-        sentence += str(dataCol)
-        sentence += "=?"
-        dataArr = [data]
-        self.cur.execute(sentence,dataArr) 
-        result = self.cur.fetchall() 
-        return result
+        if data == "" and dataCol == "":
+            sentence = "SELECT * FROM "
+            sentence += str(tableName)
+            
+            dataArr = [data]
+            self.cur.execute(sentence) 
+            result = self.cur.fetchall() 
+            return result
+        else:
+            sentence = "SELECT * FROM "
+            sentence += str(tableName)
+            sentence += " WHERE "
+            sentence += str(dataCol)
+            sentence += "=?"
+            dataArr = [data]
+            self.cur.execute(sentence,dataArr) 
+            result = self.cur.fetchall() 
+            return result
 
     def dataUpdate(self,tableName,colType,newData,usercode): #중복체크
         sentence = "UPDATE "

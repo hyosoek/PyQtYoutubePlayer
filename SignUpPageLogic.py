@@ -9,23 +9,28 @@ class SignUpPageLogic:
     def __init__(self,Ui):
         self.ui = Ui
         self.idCheckFlag = False
-
-        
         self.ui.signUpBtnList[0].clicked.connect(lambda event: self.signUpSeq(event))
         self.ui.signUpBtnList[1].clicked.connect(lambda event: self.idCheck(event))
         self.ui.signUpBtnList[2].clicked.connect(lambda event: self.goToSignIn(event))
+        db = DataBase()
+        self.userDataTemp = db.dataRead("user","","")
 
     def idCheck(self,event):
-        db = DataBase()
+        
         idtemp = self.ui.signUpLineEditList[0].text()
-        userDataTemp = db.dataRead("user","id",idtemp)
-        if len(userDataTemp) == 0 and idtemp != "": #아이디가 중복존재하지 않으면
+        userIndex = -1
+        for i in range(0,len(self.userDataTemp)):
+            if self.userDataTemp[i][0] == idtemp:
+                userIndex = i #있으면 인덱스 반환
+
+        if userIndex == -1 and idtemp != "": #아이디가 중복존재하지 않고, 빈 입력칸이 아니면
             self.ui.idCheckLabel.setText("Enable!")
             self.ui.idCheckLabel.setStyleSheet("color: green;\n"
             "background-color : rgb(50,50,50);\n"
             "font-size: 13pt;")
             self.ui.signUpLineEditList[0].setDisabled(True)
             self.idCheckFlag = True
+
         else:
             self.ui.idCheckLabel.setText("Disable!")
             self.ui.idCheckLabel.setStyleSheet("color: red;\n"
@@ -49,7 +54,7 @@ class SignUpPageLogic:
 
     def goToSignIn(self,event):
         self.showSignIn()
-
+        
     def showSignIn(self):
         self.ui.signUpLineEditList[0].setDisabled(False)
         self.ui.idCheckLabel.setText("")
@@ -57,4 +62,5 @@ class SignUpPageLogic:
         for i in range(0,4):
             self.ui.signUpLineEditList[i].setText("")
         self.ui.stackedWidget.setCurrentIndex(0)
-        self.ui.signUpBtnList[2].disconnect()
+        for i in range(0,3):
+            self.ui.signUpBtnList[i].disconnect()

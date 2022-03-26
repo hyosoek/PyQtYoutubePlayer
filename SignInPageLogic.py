@@ -12,7 +12,6 @@ class SignInPageLogic:
 
         self.ui.signIpBtnList[0].clicked.connect(lambda event: self.signInSequence(event))
         self.ui.signIpBtnList[1].clicked.connect(lambda event: self.showSignUp(event))
-        
         self.ui.signIpBtnList[0].enterEvent = lambda event : self.signInBtnColorChange1(event)
         self.ui.signIpBtnList[0].leaveEvent = lambda event : self.signInBtnColorChange2(event)
         self.ui.signIpBtnList[1].enterEvent = lambda event : self.goToSignUpBtnColorChange1(event)
@@ -20,23 +19,23 @@ class SignInPageLogic:
 
     def signInSequence(self,event):
         db = DataBase()
+        userDataTemp = db.dataRead("user","","") #확인을 눌러줄때마다 db정보를 새로 갱신합니다.
         idtemp = self.ui.signInLineEditList[0].text()
         pwtemp = self.ui.signInLineEditList[1].text()
-        userDataTemp = db.dataRead("user","id",idtemp)
-
-        if idtemp == "" or pwtemp == "" or len(userDataTemp) == 0 or (userDataTemp[0][1] != pwtemp):
-            db.dataRead("user","id",idtemp)#아이디가 존재하지 않거나, 틀렸을 때,
+        userIndex = -1
+        for i in range(0,len(userDataTemp)):
+            if userDataTemp[i][0] == idtemp:
+                userIndex = i
+        if idtemp == "" or pwtemp == "" or userIndex == -1 or (userDataTemp[userIndex][1] != pwtemp):
             self.ui.idWrongLabel.setText("Wrong!")
         else:
-            self.showPlayList(userDataTemp[0][3])
+            self.showPlayList(userDataTemp[userIndex][3])
 
 
     def showPlayList(self,usercode):
-        db = DataBase()
         for i in range(0,2):
             self.ui.signInLineEditList[i].setText("")
         self.ui.idWrongLabel.setText("")
-
         self.ui.stackedWidget.setCurrentIndex(2)
         self.playList = PlayListPageLogic(self.ui,usercode)
         
