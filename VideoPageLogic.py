@@ -16,7 +16,7 @@ class VideoPageLogic(QWidget):
         self.playListCode = playListCode
         self.videoBtnList = []
         self.videlDelBtnList = []
-        # self.videoNameLabelList = []
+        self.videoNameLabelList = []
         # self.thubNailList = []
 
         db = DataBase()
@@ -35,7 +35,7 @@ class VideoPageLogic(QWidget):
 ##############################################################################################################
 
     def addVideoSeq(self,event):
-        db = DataBase() 
+        db = DataBase()
         url, ok = QInputDialog.getText(self, 'Add Video', "what is Video URL?")
         #한 유저 내 url 중복체크 기능이 필요합니다.
         if ok:
@@ -61,21 +61,25 @@ class VideoPageLogic(QWidget):
                 "border-radius: 8px;")
         self.ui.videoListVbox.addWidget(videoBtn)
         videoBtn.setObjectName(str(videocode)) #버튼에 비디오 코드로 값을 매겨주면 접근이 편합니다.
-        
-        for i in range(0,len(self.videoData)):
-            if self.videoData[i][2] == videocode:
-                videoUrl = self.videoData[i][1]
         #videoBtn.mouseReleaseEvent = lambda event: self.loadVideo(event,videoUrl) #url에 접근할때만 사용합니다.
 
         #영상삭제버튼
-        delBtn = QtWidgets.QWidget(videoBtn)
+        delBtn = QtWidgets.QLabel(videoBtn)
         delBtn.setGeometry(QtCore.QRect(220, 60, 30, 30))
-        delBtn.setStyleSheet("background-color : rgb(80,80,80);\n")
-        delBtn.mouseReleaseEvent = lambda event: self.removeVideo(event,videoUrl)
+        delBtn.setStyleSheet("background-color : rgb(80,80,80);\n"
+        " font-size : 25pt;\n"
+        " color : white;\n"
+        "padding-left : 1px;")
+        delBtn.setText("X")
+        delBtn.mouseReleaseEvent = lambda event: self.removeVideoSeq(event,videocode)
         
         # 영상썸네일
-        # url = videoUrl
-        # video = pafy.new(url)
+        for i in range(0,len(self.videoData)):
+            if self.videoData[i][2] == videocode:
+                url = self.videoData[i][1]
+        
+            
+
         # videoThumbNailUrl  = video.thumb
         # image = QImage()
         # image.loadFromData(requests.get(videoThumbNailUrl).content)
@@ -83,49 +87,49 @@ class VideoPageLogic(QWidget):
         # thumbNail.setPixmap(QPixmap(image))
         # thumbNail.setGeometry(QtCore.QRect(-50, 10, 200, 80))
         
-        # #영상제목
-        # videoNameLabel = QtWidgets.QLabel(videoBtn)
-        # videoNameLabel.setStyleSheet("background-color : rgb(30,30,30);\n"
-        #         "color : white;\n"
-        #         "padding-left : 0px;\n"
-        #         "font-size: 12pt;")
-        # videoNameLabel.setGeometry(QtCore.QRect(140, 5, 120, 50))
-        
-        # newLinedTitle = ""
-        # oldTitle = video.title
-        # for i in range(0,len(oldTitle)):
-        #     if i%13 == 12:
-        #         newLinedTitle += oldTitle[i]
-        #         newLinedTitle += "\n"
-        #     else:
-        #         newLinedTitle += oldTitle[i]
-               
-        # videoNameLabel.setText(newLinedTitle)
-        
-        
+        #영상제목
+        try:
+            video = pafy.new(url)
+            self.videoNameLabel = QtWidgets.QLabel(videoBtn)
+            self.videoNameLabel.setStyleSheet("background-color : rgb(30,30,30);\n"
+                    "color : white;\n"
+                    "padding-left : 0px;\n"
+                    "font-size: 12pt;")
+            self.videoNameLabel.setGeometry(QtCore.QRect(140, 5, 120, 50))
+            
+            newLinedTitle = ""
+            oldTitle = video.title
+            for i in range(0,len(oldTitle)):
+                if i%13 == 12:
+                    newLinedTitle += oldTitle[i]
+                    newLinedTitle += "\n"
+                else:
+                    newLinedTitle += oldTitle[i]
+
+            self.videoNameLabel.setText(newLinedTitle)
+            self.videoNameLabelList.append(self.videoNameLabel)
+        except:
+            self.videoNameLabelList.append("None")
+            
         #모든 위젯을 관리해줄 list
         self.videoBtnList.append(videoBtn)
         self.videlDelBtnList.append(delBtn)
-        # self.videoNameLabelList.append(videoNameLabel)
+        
         # self.thubNailList.append(thumbNail)
 
+    def removeVideoSeq(self,event,videoCode):
+        self.removeVideo(videoCode)
 
-    def removeVideo(self,event,url):
+    def removeVideo(self,videoCode): #비디오 코드 조회해서 삭제하기
         db = DataBase()
-        for i in range(0,len(self.videoData)):
-            if self.videoData[i][1] == url:
-                videoCode = self.videoData[i][2]
         db.dataDelete("video","videocode",videoCode)
-
         for i in range(0,len(self.videoBtnList)):
             if (self.videoBtnList[i].objectName() == str(videoCode)):
                 delIndex = i
         self.videoBtnList[delIndex].deleteLater()
         del self.videoBtnList[delIndex]
-        self.videlDelBtnList[delIndex].deleteLater()
-        del self.videlDelBtnList[delIndex]
-        # self.videoNameLabelList[delIndex].deleteLater()
-        # del self.videoNameLabelList[delIndex]
+        
+        
 
     def loadVideo(self,url):
         pass
@@ -135,14 +139,10 @@ class VideoPageLogic(QWidget):
         for i in range(0,2):
             self.ui.videoPageBtnList[i].disconnect()
         for i in range(0,len(self.videoBtnList)):
-            #self.videoBtnList[i].disconnect()
-            #self.videlDelBtnList[i].disconnect()
+            self.videoBtnList[i].disconnect()
             self.videoBtnList[i].deleteLater()
-            self.videlDelBtnList[i].deleteLater()
-            # self.videoNameLabelList[i].deleteLater()
-
         del self.videoBtnList
         del self.videlDelBtnList
-        # del self.videoNameLabelList
+        del self.videoNameLabelList
 
 

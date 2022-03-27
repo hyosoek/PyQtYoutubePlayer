@@ -158,16 +158,20 @@ class Ui(QtWidgets.QMainWindow):
 
         self.playListScroll = QtWidgets.QScrollArea(self.pageList[2])
         self.playListWidget = QtWidgets.QWidget()
-        self.playListVbox = QtWidgets.QVBoxLayout() 
+        self.playListVbox = QtWidgets.QVBoxLayout()
 
         self.playListScroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.playListScroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.playListScroll.setWidgetResizable(True)
         self.playListScroll.setGeometry(QtCore.QRect(550,100,540,800))
-
+        
         
         self.playListWidget.setLayout(self.playListVbox)
         self.playListScroll.setWidget(self.playListWidget)
+        
+        self.playListVbox.addStretch(1)
+        self.playListVbox.setDirection(QtWidgets.QBoxLayout.BottomToTop)
+        
 
 
         self.playListidLabel = QtWidgets.QLabel(self.pageList[2])
@@ -212,6 +216,9 @@ class Ui(QtWidgets.QMainWindow):
 
         self.videoListWidget.setLayout(self.videoListVbox)
         self.videoScroll.setWidget(self.videoListWidget)
+        self.videoListVbox.addStretch(1)
+        self.videoListVbox.setDirection(QtWidgets.QBoxLayout.BottomToTop)
+        
 
         #중복코드 인가?
         self.videoPageidLabel = QtWidgets.QLabel(self.pageList[3])

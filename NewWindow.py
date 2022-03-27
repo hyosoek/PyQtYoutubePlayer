@@ -21,16 +21,16 @@ class NewWindow(QWidget):
             "font-size : 16pt;")
         self.explainLabel.setText("Input PlayList's Name what yo want")
 
-        self.playListNameInput = QLineEdit(self)
-        self.playListNameInput.setGeometry(20,110,360,30)
-        self.playListNameInput.setStyleSheet("background-color : rgb(20,20,20);\n"
+        self.inputLineEdit = QLineEdit(self)
+        self.inputLineEdit.setGeometry(20,110,360,30)
+        self.inputLineEdit.setStyleSheet("background-color : rgb(20,20,20);\n"
             "color : white;\n"
             "padding-left: 5px;\n"
             "border-radius: 1px;\n")
 
-        self.explainLabel = QLabel(self)
-        self.explainLabel.setGeometry(330,145,60,16)
-        self.explainLabel.setStyleSheet("color : red;\n"
+        self.warnLabel = QLabel(self)
+        self.warnLabel.setGeometry(330,145,60,16)
+        self.warnLabel.setStyleSheet("color : red;\n"
             "font-size : 16pt;")
         
         self.cancelBtn = QPushButton(self)
@@ -77,4 +77,6 @@ class NewWindow(QWidget):
             "color : white;\n"
             "font-size : 20pt;")
         self.yesBtn.setText("Yes")
+
+    
 

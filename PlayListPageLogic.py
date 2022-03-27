@@ -17,41 +17,47 @@ class PlayListPageLogic(QWidget):
         self.playListLabelList = []
         db = DataBase()
         self.playListData = db.dataRead("playlist","usercode",self.usercode)
+        #self.allUserPlayListData = db.dataRead("playlist","","")
         self.userData = db.dataRead("user","usercode",self.usercode)
-
+        
         for i in range(0,len(self.playListData)):
             self.addPlayList(self.playListData[i][2])
-            
         self.ui.playListidLabel.setText(self.userData[0][0]+"님 환영합니다!")
-
-
         self.ui.playListBtnList[0].clicked.connect(lambda event: self.showSignIn(event))
         self.ui.playListBtnList[1].clicked.connect(lambda event: self.addPlayListSeq(event))
-              
-
-
+                      
     def addPlayListSeq(self,event):
-        db = DataBase() #data create에 필요
-        namecheck = False
-        playListName, ok = QInputDialog.getText(self, 'Add PlayList', "PlayList's Name")
-        if ok:
-            for i in range(0,len(self.playListData)):
-                if  self.playListData[0][1] == playListName:
-                    namecheck = True
-            if namecheck == False:
-                colTemp = ("usercode","playlistname")
-                dataTemp = (self.usercode,playListName)
-                db.dataCreate("playlist",colTemp,dataTemp)
-                self.addPlayList(playListName)
-            else:
-                pass
-                
-    # def addPlayListSeq(self,event):
-    #     self.newWindow = NewWindow()
-    #     self.newWindow.addPlayList()
-    #     self.newWindow.show()
-        #db add해주고, playListData도 데이터 한번 업데이트 해주기
+        self.newWindow = NewWindow()
+        self.newWindow.addPlayList()
+        self.newWindow.show()
+        self.newWindow.cancelBtn.clicked.connect(lambda event: self.closeAddWindowSeq(event))
+        self.newWindow.enrollBtn.clicked.connect(lambda event: self.enrollPlayList(event))
+        
+        
+    def enrollPlayList(self,event):
+        flag = False
+        for i in range(0,len(self.playListData)):
+            if self.newWindow.inputLineEdit.text() == self.playListData[i][1]:
+                flag = True
+        if flag == True: #중복된 아이디가 있으면
+            self.newWindow.warnLabel.setText("Invalid!")
+        else:
+            db = DataBase()
+            colTemp = ("usercode","playlistname")
+            dataTemp = (self.usercode , str(self.newWindow.inputLineEdit.text()))
+            db.dataCreate("playlist",colTemp,dataTemp)
+            self.playListData = db.dataRead("playlist","usercode",self.usercode)
+            playListCode = self.playListData[len(self.playListData)-1][2]
+            self.addPlayList(playListCode)
+            self.closeAddWindow()
 
+    def closeAddWindowSeq(self,event):
+        self.closeAddWindow()
+
+    def closeAddWindow(self):
+        self.newWindow.cancelBtn.disconnect()
+        self.newWindow.enrollBtn.disconnect()
+        del self.newWindow
 
     def addPlayList(self,playListCode):
 
@@ -79,7 +85,7 @@ class PlayListPageLogic(QWidget):
         " color : white;\n"
         "padding-left : 4px;")
         delBtn.setText("X")
-        delBtn.mouseReleaseEvent = lambda event, code = playListCode: self.removePlayList(event,code)#등록당시의 버튼 크기가 아닌 것으로 등록됨
+        delBtn.mouseReleaseEvent = lambda event, code = playListCode: self.removeSeq(event,code)#등록당시의 버튼 크기가 아닌 것으로 등록됨
 
         self.ui.playListVbox.addWidget(playListBtn)
         self.playListBtnList.append(playListBtn)
@@ -90,8 +96,19 @@ class PlayListPageLogic(QWidget):
         self.newWindow = NewWindow()
         self.newWindow.delConfirm()
         self.newWindow.show()
+        self.newWindow.noBtn.clicked.connect(lambda event: self.closeDelWindow(event))
+        self.newWindow.yesBtn.clicked.connect(lambda event, playListCode = code: self.removePlayList(event,playListCode))
+
+    def closeDelWindow(self,event):
+        self.newWindow.noBtn.disconnect()
+        self.newWindow.yesBtn.disconnect()
+        del self.newWindow
 
     def removePlayList(self,event,playListCode):
+        self.newWindow.noBtn.disconnect()
+        self.newWindow.yesBtn.disconnect()
+        del self.newWindow
+
         db = DataBase()
         db.dataDelete("video","playlistcode",playListCode) #어차피 삭제해야함
         db.dataDelete("playlist","playlistcode",playListCode)
