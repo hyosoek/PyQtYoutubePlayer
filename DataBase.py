@@ -33,7 +33,6 @@ class DataBase:
         sentence += "?"
         sentence += ")"
         data = dataList
-        print(sentence)
         self.cur.execute(sentence,data) 
         self.con.commit()
         

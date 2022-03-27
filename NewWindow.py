@@ -19,7 +19,7 @@ class NewWindow(QWidget):
         self.explainLabel.setGeometry(70,80,320,16)
         self.explainLabel.setStyleSheet("color : white;\n"
             "font-size : 16pt;")
-        self.explainLabel.setText("Input PlayList's Name what yo want")
+        self.explainLabel.setText("Input PlayList's Name what you want")
 
         self.inputLineEdit = QLineEdit(self)
         self.inputLineEdit.setGeometry(20,110,360,30)
@@ -52,7 +52,7 @@ class NewWindow(QWidget):
 
     def addVideo(self):
         self.addPlayList()
-        self.explainLabel.setText("Input YouTube's URL what yo want")
+        self.explainLabel.setText("Input YouTube's URL what you want")
         
 
     def delConfirm(self):

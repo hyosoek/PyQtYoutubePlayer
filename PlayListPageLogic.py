@@ -27,37 +27,37 @@ class PlayListPageLogic(QWidget):
         self.ui.playListBtnList[1].clicked.connect(lambda event: self.addPlayListSeq(event))
                       
     def addPlayListSeq(self,event):
-        self.newWindow = NewWindow()
-        self.newWindow.addPlayList()
-        self.newWindow.show()
-        self.newWindow.cancelBtn.clicked.connect(lambda event: self.closeAddWindowSeq(event))
-        self.newWindow.enrollBtn.clicked.connect(lambda event: self.enrollPlayList(event))
+        self.newAddWindow = NewWindow()
+        self.newAddWindow.addPlayList()
+        self.newAddWindow.show()
+        self.newAddWindow.cancelBtn.clicked.connect(lambda event: self.cancelBtnSeq(event))
+        self.newAddWindow.enrollBtn.clicked.connect(lambda event: self.enrollBtnSeq(event))
         
         
-    def enrollPlayList(self,event):
+    def enrollBtnSeq(self,event):
         flag = False
         for i in range(0,len(self.playListData)):
-            if self.newWindow.inputLineEdit.text() == self.playListData[i][1]:
+            if self.newAddWindow.inputLineEdit.text() == self.playListData[i][1]:
                 flag = True
         if flag == True: #중복된 아이디가 있으면
-            self.newWindow.warnLabel.setText("Invalid!")
+            self.newAddWindow.warnLabel.setText("Invalid!")
         else:
             db = DataBase()
             colTemp = ("usercode","playlistname")
-            dataTemp = (self.usercode , str(self.newWindow.inputLineEdit.text()))
+            dataTemp = (self.usercode , str(self.newAddWindow.inputLineEdit.text()))
             db.dataCreate("playlist",colTemp,dataTemp)
             self.playListData = db.dataRead("playlist","usercode",self.usercode)
             playListCode = self.playListData[len(self.playListData)-1][2]
             self.addPlayList(playListCode)
             self.closeAddWindow()
 
-    def closeAddWindowSeq(self,event):
+    def cancelBtnSeq(self,event):
         self.closeAddWindow()
 
     def closeAddWindow(self):
-        self.newWindow.cancelBtn.disconnect()
-        self.newWindow.enrollBtn.disconnect()
-        del self.newWindow
+        self.newAddWindow.cancelBtn.disconnect()
+        self.newAddWindow.enrollBtn.disconnect()
+        del self.newAddWindow
 
     def addPlayList(self,playListCode):
 
@@ -93,34 +93,39 @@ class PlayListPageLogic(QWidget):
         self.playListLabelList.append(playListLabel)
 
     def removeSeq(self,event,code): #물어보는 부분
-        self.newWindow = NewWindow()
-        self.newWindow.delConfirm()
-        self.newWindow.show()
-        self.newWindow.noBtn.clicked.connect(lambda event: self.closeDelWindow(event))
-        self.newWindow.yesBtn.clicked.connect(lambda event, playListCode = code: self.removePlayList(event,playListCode))
+        self.newDelWindow = NewWindow()
+        self.newDelWindow.delConfirm()
+        self.newDelWindow.show()
+        self.newDelWindow.noBtn.clicked.connect(lambda event: self.closeDelWindow(event))
+        self.newDelWindow.yesBtn.clicked.connect(lambda event, playListCode = code: self.removePlayList(event,playListCode))
 
     def closeDelWindow(self,event):
-        self.newWindow.noBtn.disconnect()
-        self.newWindow.yesBtn.disconnect()
-        del self.newWindow
+        self.newDelWindow.noBtn.disconnect()
+        self.newDelWindow.yesBtn.disconnect()
+        del self.newDelWindow
 
     def removePlayList(self,event,playListCode):
-        self.newWindow.noBtn.disconnect()
-        self.newWindow.yesBtn.disconnect()
-        del self.newWindow
+        self.newDelWindow.noBtn.disconnect()
+        self.newDelWindow.yesBtn.disconnect()
+        del self.newDelWindow
 
         db = DataBase()
         db.dataDelete("video","playlistcode",playListCode) #어차피 삭제해야함
         db.dataDelete("playlist","playlistcode",playListCode)
+        for i in range(0,len(self.playListData)):
+            if self.playListData[i][2] == playListCode:
+                del self.playListData[i]
+
         for i in range(0,len(self.playListLabelList)):
             if (self.playListBtnList[i].objectName() == str(playListCode)):
                 delIndex = i
+
         self.playListDelBtnList[delIndex].deleteLater()
         del self.playListDelBtnList[delIndex]
-        self.playListBtnList[delIndex].deleteLater()
-        del self.playListBtnList[delIndex]
         self.playListLabelList[delIndex].deleteLater()
         del self.playListLabelList[delIndex]
+        self.playListBtnList[delIndex].deleteLater()
+        del self.playListBtnList[delIndex]
         
 
     def showVideoPage(self,event,playListCode):

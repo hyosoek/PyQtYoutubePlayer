@@ -249,17 +249,13 @@ class Ui(QtWidgets.QMainWindow):
         self.videoPageBtnList.append(videoAddBtn)
 
 
-        #영상 하단바
+        #영상영역
         self.TitleLabel = QtWidgets.QLabel(self.pageList[3])
         self.TitleLabel.setGeometry(QtCore.QRect(40, 840, 850, 40))
         self.TitleLabel.setStyleSheet(
                 "color : white;"
                 "font-size: 25pt;")
         self.TitleLabel.setText("Vidoe Title")
-
-        self.videoWidget = QtWidgets.QWidget(self.pageList[3])
-        self.videoWidget.setGeometry(QtCore.QRect(10, 50, 1280, 720))
-        self.videoWidget.setStyleSheet("background-color : rgb(80,80,80);")
 
         self.volumeSlider = QtWidgets.QSlider(Qt.Horizontal, self.pageList[3])
         self.volumeSlider.move(30, 30)
@@ -278,3 +274,6 @@ class Ui(QtWidgets.QMainWindow):
             self.videoControlBtnList[i].setIcon(icon)
             self.videoControlBtnList[i].setIconSize(QtCore.QSize(40, 40))
             
+        self.videoWidget = QtWidgets.QFrame(self.pageList[3])
+        self.videoWidget.setGeometry(QtCore.QRect(10, 50, 1280, 720))
+        self.videoWidget.setStyleSheet("background-color : rgb(80,80,80);")
