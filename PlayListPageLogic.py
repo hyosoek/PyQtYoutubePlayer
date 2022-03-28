@@ -147,7 +147,3 @@ class PlayListPageLogic(QWidget):
         del self.playListLabelList
         del self.playListDelBtnList
             
-
-
-    def modifyBtnDesign(self,event):
-        pass

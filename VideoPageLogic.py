@@ -1,3 +1,4 @@
+from ast import Pass
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QSize
@@ -22,7 +23,10 @@ class VideoPageLogic(QObject,threading.Thread):
         self.videoBtnList = []
         self.videlDelBtnList = []
         self.videoNameLabelList = []
-        self.videoThumbNailList = []
+        self.videoThumbNailList = [] #위젯들
+
+        self.thumbnailImageList = [] #로드해서 저장해줄 곳
+        self.videoNameList = [] #로드해서 저장해줄 곳
 
         db = DataBase()
         self.videoData = db.dataRead("video","playlistcode",self.playListCode)
@@ -35,9 +39,37 @@ class VideoPageLogic(QObject,threading.Thread):
         self.ui.videoPageBtnList[0].clicked.connect(lambda event: self.showPlayList(event))
         self.ui.videoPageBtnList[1].clicked.connect(lambda event: self.addVideoSeq(event))
         self.signal.connect(self.videoBtnSubWidget)
+        
 
     def run(self):
-        self.signal.emit(44)
+        for i in range(0,len(self.videoData)):
+            self.loadThumbNailTitleData(self.videoData[i][2])
+            self.signalEmitting(self.videoData[i][2])
+        
+    def signalEmitting(self,videoCode):
+        self.signal.emit(videoCode)
+
+    def loadThumbNailTitleData(self,videoCode):
+        for i in range(0,len(self.videoData)):
+            if self.videoData[i][2] == videoCode:
+                index = i
+        url = self.videoData[index][1]
+        video = pafy.new(url)        
+
+        videoThumbNailUrl  = video.thumb
+        image = QImage()
+        image.loadFromData(requests.get(videoThumbNailUrl).content)
+        self.thumbnailImageList.append(image)
+
+        newLinedTitle = ""
+        oldTitle = video.title
+        for j in range(0,len(oldTitle)):
+            if j%13 == 12:
+                newLinedTitle += oldTitle[j]
+                newLinedTitle += "\n"
+            else:
+                newLinedTitle += oldTitle[j]
+        self.videoNameList.append(newLinedTitle)
 
     def addVideoSeq(self,event):
         self.newAddWindow = NewWindow()
@@ -66,6 +98,8 @@ class VideoPageLogic(QObject,threading.Thread):
                 videoCode = self.videoData[len(self.videoData)-1][2]
                 print(self.videoData)
                 self.addVideo(videoCode)
+                self.loadThumbNailTitleData(videoCode)
+                self.videoBtnSubWidget(videoCode)
                 self.closeAddWindow()
         except:
             self.newAddWindow.warnLabel.setText("Invalid!")
@@ -102,45 +136,30 @@ class VideoPageLogic(QObject,threading.Thread):
         delBtn.setText("X")
         delBtn.mouseReleaseEvent = lambda event: self.removeVideoSeq(event,videocode)
 
-        self.videoBtnList.append(videoBtn)
-        self.videlDelBtnList.append(delBtn)
-        #self.videoBtnSubWidget(videocode)
+        self.thumbNail = QtWidgets.QLabel(videoBtn)
+        self.thumbNail.setGeometry(QtCore.QRect(-50, 10, 200, 80))
 
-
-    def videoBtnSubWidget(self,videocode): 
-        for i in range(0,len(self.videoData)):
-            if self.videoData[i][2] == videocode:
-                url = self.videoData[i][1]
-                index = i
-        video = pafy.new(url)        
-
-        videoThumbNailUrl  = video.thumb
-        image = QImage()
-        image.loadFromData(requests.get(videoThumbNailUrl).content)
-        thumbNail = QtWidgets.QLabel(self.videoBtnList[index])
-        thumbNail.setPixmap(QPixmap(image))
-        thumbNail.setGeometry(QtCore.QRect(-50, 10, 200, 80))
-        
-        
-        self.videoNameLabel = QtWidgets.QLabel(self.videoBtnList[index])
+        self.videoNameLabel = QtWidgets.QLabel(videoBtn)
         self.videoNameLabel.setStyleSheet("background-color : rgb(30,30,30);\n"
                 "color : white;\n"
+                "font-size : 8pt;\n"
                 "padding-left : 0px;\n"
                 "font-size: 12pt;")
         self.videoNameLabel.setGeometry(QtCore.QRect(140, 3, 140, 50))
 
-        newLinedTitle = ""
-        oldTitle = video.title
-        for i in range(0,len(oldTitle)):
-            if i%13 == 12:
-                newLinedTitle += oldTitle[i]
-                newLinedTitle += "\n"
-            else:
-                newLinedTitle += oldTitle[i]
-        self.videoNameLabel.setText(newLinedTitle)
-        self.videoThumbNailList.append(thumbNail)
+        self.videoBtnList.append(videoBtn)
+        self.videlDelBtnList.append(delBtn)
+        self.videoThumbNailList.append(self.thumbNail)
         self.videoNameLabelList.append(self.videoNameLabel)
-                    
+
+
+    def videoBtnSubWidget(self,videoCode): 
+        for i in range(0,len(self.videoData)):
+            if self.videoData[i][2] == videoCode:
+                index = i    
+        self.videoThumbNailList[index].setPixmap(QPixmap(self.thumbnailImageList[index]))
+        self.videoNameLabelList[index].setText(self.videoNameList[index])
+        
 
     def removeVideoSeq(self,event,videoCode): #여기에 묻는 창 만들기
         self.newDelWindow = NewWindow()
