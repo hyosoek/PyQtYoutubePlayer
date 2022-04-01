@@ -1,4 +1,4 @@
-from ast import Pass
+from ast import Pass, expr_context
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QSize
@@ -50,26 +50,30 @@ class VideoPageLogic(QObject,threading.Thread):
         self.signal.emit(videoCode)
 
     def loadThumbNailTitleData(self,videoCode):
-        for i in range(0,len(self.videoData)):
-            if self.videoData[i][2] == videoCode:
-                index = i
-        url = self.videoData[index][1]
-        video = pafy.new(url)        
+        try:
+            for i in range(0,len(self.videoData)):
+                if self.videoData[i][2] == videoCode:
+                    index = i
+            url = self.videoData[index][1]
+            video = pafy.new(url)        
 
-        videoThumbNailUrl  = video.thumb
-        image = QImage()
-        image.loadFromData(requests.get(videoThumbNailUrl).content)
-        self.thumbnailImageList.append(image)
+            videoThumbNailUrl  = video.thumb
+            image = QImage()
+            image.loadFromData(requests.get(videoThumbNailUrl).content)
+            self.thumbnailImageList.append(image)
 
-        newLinedTitle = ""
-        oldTitle = video.title
-        for j in range(0,len(oldTitle)):
-            if j%13 == 12:
-                newLinedTitle += oldTitle[j]
-                newLinedTitle += "\n"
-            else:
-                newLinedTitle += oldTitle[j]
-        self.videoNameList.append(newLinedTitle)
+            newLinedTitle = ""
+            oldTitle = video.title
+            for j in range(0,len(oldTitle)):
+                if j%13 == 12:
+                    newLinedTitle += oldTitle[j]
+                    newLinedTitle += "\n"
+                else:
+                    newLinedTitle += oldTitle[j]
+            self.videoNameList.append(newLinedTitle)
+        except:
+            #다시 구현하기
+            pass
 
     def addVideoSeq(self,event):
         self.newAddWindow = NewWindow()
@@ -153,13 +157,15 @@ class VideoPageLogic(QObject,threading.Thread):
         self.videoNameLabelList.append(self.videoNameLabel)
 
 
-    def videoBtnSubWidget(self,videoCode): 
-        for i in range(0,len(self.videoData)):
-            if self.videoData[i][2] == videoCode:
-                index = i    
-        self.videoThumbNailList[index].setPixmap(QPixmap(self.thumbnailImageList[index]))
-        self.videoNameLabelList[index].setText(self.videoNameList[index])
-        
+    def videoBtnSubWidget(self,videoCode):
+        try:
+            for i in range(0,len(self.videoData)):
+                if self.videoData[i][2] == videoCode:
+                    index = i    
+            self.videoThumbNailList[index].setPixmap(QPixmap(self.thumbnailImageList[index]))
+            self.videoNameLabelList[index].setText(self.videoNameList[index])
+        except:
+            print("error1")
 
     def removeVideoSeq(self,event,videoCode): #여기에 묻는 창 만들기
         self.newDelWindow = NewWindow()
@@ -189,6 +195,11 @@ class VideoPageLogic(QObject,threading.Thread):
         self.videoBtnList[delIndex].deleteLater()
         del self.videoBtnList[delIndex]
         del self.videoData[delIndex] #그래야 방금 지운거 다시 추가 할 수 있음.
+        
+        del self.thumbnailImageList[delIndex]
+        del self.videoNameList[delIndex]
+        del self.videoNameLabelList[delIndex]
+        del self.videoThumbNailList[delIndex]
         
         
     def loadVideo(self,url):

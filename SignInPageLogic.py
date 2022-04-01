@@ -9,7 +9,6 @@ from PlayListPageLogic import *
 class SignInPageLogic:
     def __init__(self):
         self.ui = Ui()
-
         self.ui.signIpBtnList[0].clicked.connect(lambda event: self.signInSequence(event))
         self.ui.signIpBtnList[1].clicked.connect(lambda event: self.showSignUp(event))
         self.ui.signIpBtnList[0].enterEvent = lambda event : self.signInBtnColorChange1(event)

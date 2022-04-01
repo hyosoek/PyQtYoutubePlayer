@@ -112,6 +112,7 @@ class PlayListPageLogic(QWidget):
         db = DataBase()
         db.dataDelete("video","playlistcode",playListCode) #어차피 삭제해야함
         db.dataDelete("playlist","playlistcode",playListCode)
+
         for i in range(0,len(self.playListData)):
             if self.playListData[i][2] == playListCode:
                 del self.playListData[i]
@@ -126,6 +127,7 @@ class PlayListPageLogic(QWidget):
         del self.playListLabelList[delIndex]
         self.playListBtnList[delIndex].deleteLater()
         del self.playListBtnList[delIndex]
+        #여기서 오류남 - 마지막 삭제 안되는거
         
 
     def showVideoPage(self,event,playListCode):
