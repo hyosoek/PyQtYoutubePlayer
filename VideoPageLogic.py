@@ -1,4 +1,3 @@
-from ast import Pass, expr_context
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QSize
@@ -6,14 +5,11 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from Ui import *
 from DataBase import *
 from NewWindow import *
-import pafy
+#from LoadData import *
 #영상 재생을 위해서
-import threading
-import time
 
 
-class VideoPageLogic(QObject,threading.Thread):
-    signal = pyqtSignal(int)
+class VideoPageLogic(QObject):
 
     def __init__(self,Ui,playListCode,userName):
         super().__init__()
@@ -34,21 +30,11 @@ class VideoPageLogic(QObject,threading.Thread):
 
         for i in range(0,len(self.videoData)): 
             self.addVideo(self.videoData[i][2]) #parameter로 url을 사용하지 않습니다.
-        self.start()
+
         self.ui.videoPageidLabel.setText(userName+"님 환영합니다!")
         self.ui.videoPageBtnList[0].clicked.connect(lambda event: self.showPlayList(event))
         self.ui.videoPageBtnList[1].clicked.connect(lambda event: self.addVideoSeq(event))
-        self.signal.connect(self.videoBtnSubWidget)
         
-
-    def run(self):
-        for i in range(0,len(self.videoData)):
-            self.loadThumbNailTitleData(self.videoData[i][2])
-            self.signalEmitting(self.videoData[i][2])
-        
-    def signalEmitting(self,videoCode):
-        self.signal.emit(videoCode)
-
     def loadThumbNailTitleData(self,videoCode):
         try:
             for i in range(0,len(self.videoData)):
@@ -86,7 +72,7 @@ class VideoPageLogic(QObject,threading.Thread):
         flag = False
         try: #유효한 url인가?
             url = self.newAddWindow.inputLineEdit.text()
-            video = pafy.new(url)
+            #video = pafy.new(url)
 
             for i in range(0,len(self.videoData)):
                 if self.newAddWindow.inputLineEdit.text() == self.videoData[i][1]: #url 체크
@@ -102,12 +88,14 @@ class VideoPageLogic(QObject,threading.Thread):
                 videoCode = self.videoData[len(self.videoData)-1][2]
                 print(self.videoData)
                 self.addVideo(videoCode)
-                self.loadThumbNailTitleData(videoCode)
+                #self.loadThumbNailTitleData(videoCode)
                 self.videoBtnSubWidget(videoCode)
                 self.closeAddWindow()
+
         except:
             self.newAddWindow.warnLabel.setText("Invalid!")
         
+
     def cancelBtnSeq(self,event):
         self.closeAddWindow()
 
@@ -126,7 +114,7 @@ class VideoPageLogic(QObject,threading.Thread):
                 "color : white;\n"
                 "padding-left:60px;\n"
                 "border-radius: 8px;")
-        self.ui.videoListVbox.addWidget(videoBtn)
+        self.ui.videoListVbox.insertWidget(self.ui.videoListVbox.count()-1, videoBtn)
         videoBtn.setObjectName(str(videocode)) #버튼에 비디오 코드로 값을 매겨주면 접근이 편합니다.
         #videoBtn.mouseReleaseEvent = lambda event: self.loadVideo(event,videoUrl) #url에 접근할때만 사용합니다.
 
@@ -155,6 +143,13 @@ class VideoPageLogic(QObject,threading.Thread):
         self.videlDelBtnList.append(delBtn)
         self.videoThumbNailList.append(self.thumbNail)
         self.videoNameLabelList.append(self.videoNameLabel)
+        
+        for i in range(0,len(self.videoData)):
+            if self.videoData[i][2] == videocode:
+                url = self.videoData[i][1]
+                
+        #loadData = LoadData(url,self.thumbNail,self.videoNameLabel)
+
 
 
     def videoBtnSubWidget(self,videoCode):
@@ -165,7 +160,9 @@ class VideoPageLogic(QObject,threading.Thread):
             self.videoThumbNailList[index].setPixmap(QPixmap(self.thumbnailImageList[index]))
             self.videoNameLabelList[index].setText(self.videoNameList[index])
         except:
-            print("error1")
+            print("error")
+
+
 
     def removeVideoSeq(self,event,videoCode): #여기에 묻는 창 만들기
         self.newDelWindow = NewWindow()
@@ -192,18 +189,17 @@ class VideoPageLogic(QObject,threading.Thread):
         for i in range(0,len(self.videoBtnList)):
             if (self.videoBtnList[i].objectName() == str(videoCode)):
                 delIndex = i
-        self.videoBtnList[delIndex].deleteLater()
-        del self.videoBtnList[delIndex]
         del self.videoData[delIndex] #그래야 방금 지운거 다시 추가 할 수 있음.
-        
-        del self.thumbnailImageList[delIndex]
+
+        self.videoBtnList[delIndex].deleteLater()
+        del self.videoBtnList[delIndex] #버튼 삭제
+
+        del self.thumbnailImageList[delIndex] #기타 저장소 전부 초기화
         del self.videoNameList[delIndex]
         del self.videoNameLabelList[delIndex]
         del self.videoThumbNailList[delIndex]
         
-        
-    def loadVideo(self,url):
-        pass
+
 
     def showPlayList(self,event):
         self.ui.stackedWidget.setCurrentIndex(2)
@@ -215,5 +211,3 @@ class VideoPageLogic(QObject,threading.Thread):
         del self.videoBtnList
         del self.videlDelBtnList
         del self.videoNameLabelList
-
-

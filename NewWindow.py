@@ -77,6 +77,3 @@ class NewWindow(QWidget):
             "color : white;\n"
             "font-size : 20pt;")
         self.yesBtn.setText("Yes")
-
-    
-

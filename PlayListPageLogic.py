@@ -33,7 +33,6 @@ class PlayListPageLogic(QWidget):
         self.newAddWindow.cancelBtn.clicked.connect(lambda event: self.cancelBtnSeq(event))
         self.newAddWindow.enrollBtn.clicked.connect(lambda event: self.enrollBtnSeq(event))
         
-        
     def enrollBtnSeq(self,event):
         flag = False
         for i in range(0,len(self.playListData)):
@@ -86,8 +85,8 @@ class PlayListPageLogic(QWidget):
         "padding-left : 4px;")
         delBtn.setText("X")
         delBtn.mouseReleaseEvent = lambda event, code = playListCode: self.removeSeq(event,code)#등록당시의 버튼 크기가 아닌 것으로 등록됨
-
-        self.ui.playListVbox.addWidget(playListBtn)
+        self.ui.playListVbox.insertWidget(self.ui.playListVbox.count()-1, playListBtn)
+        #self.ui.playListVbox.addWidget(playListBtn)
         self.playListBtnList.append(playListBtn)
         self.playListDelBtnList.append(delBtn)
         self.playListLabelList.append(playListLabel)
@@ -110,24 +109,22 @@ class PlayListPageLogic(QWidget):
         del self.newDelWindow
 
         db = DataBase()
-        db.dataDelete("video","playlistcode",playListCode) #어차피 삭제해야함
+        db.dataDelete("video","playlistcode",playListCode)
         db.dataDelete("playlist","playlistcode",playListCode)
 
         for i in range(0,len(self.playListData)):
             if self.playListData[i][2] == playListCode:
-                del self.playListData[i]
-
-        for i in range(0,len(self.playListLabelList)):
-            if (self.playListBtnList[i].objectName() == str(playListCode)):
                 delIndex = i
-
+        del self.playListData[delIndex]
+        # for i in range(0,len(self.playListLabelList)):
+        #     if (self.playListBtnList[i].objectName() == str(playListCode)):
+        #         delIndex = i
         self.playListDelBtnList[delIndex].deleteLater()
         del self.playListDelBtnList[delIndex]
         self.playListLabelList[delIndex].deleteLater()
         del self.playListLabelList[delIndex]
         self.playListBtnList[delIndex].deleteLater()
         del self.playListBtnList[delIndex]
-        #여기서 오류남 - 마지막 삭제 안되는거
         
 
     def showVideoPage(self,event,playListCode):
@@ -148,4 +145,3 @@ class PlayListPageLogic(QWidget):
         del self.playListBtnList
         del self.playListLabelList
         del self.playListDelBtnList
-            

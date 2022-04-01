@@ -68,6 +68,3 @@ class SignInPageLogic:
         styleSheet = self.ui.signIpBtnList[1].styleSheet()
         styleSheet += "color : white;"
         self.ui.signIpBtnList[1].setStyleSheet(styleSheet)
-
-
-    

@@ -169,9 +169,9 @@ class Ui(QtWidgets.QMainWindow):
         self.playListWidget.setLayout(self.playListVbox)
         self.playListScroll.setWidget(self.playListWidget)
         
+        self.playListVbox.setDirection(QtWidgets.QBoxLayout.TopToBottom)
         self.playListVbox.addStretch(1)
-        self.playListVbox.setDirection(QtWidgets.QBoxLayout.BottomToTop)
-        
+
 
 
         self.playListidLabel = QtWidgets.QLabel(self.pageList[2])
@@ -216,8 +216,9 @@ class Ui(QtWidgets.QMainWindow):
 
         self.videoListWidget.setLayout(self.videoListVbox)
         self.videoScroll.setWidget(self.videoListWidget)
+        self.videoListVbox.setDirection(QtWidgets.QBoxLayout.TopToBottom)
         self.videoListVbox.addStretch(1)
-        self.videoListVbox.setDirection(QtWidgets.QBoxLayout.BottomToTop)
+
         
 
         #중복코드 인가?
