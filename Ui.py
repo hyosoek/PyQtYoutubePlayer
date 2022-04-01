@@ -256,7 +256,7 @@ class Ui(QtWidgets.QMainWindow):
         self.TitleLabel.setStyleSheet(
                 "color : white;"
                 "font-size: 25pt;")
-        self.TitleLabel.setText("Vidoe Title")
+        self.TitleLabel.setText("Vidie Title")
 
         self.volumeSlider = QtWidgets.QSlider(Qt.Horizontal, self.pageList[3])
         self.volumeSlider.move(30, 30)
@@ -274,7 +274,10 @@ class Ui(QtWidgets.QMainWindow):
             icon.addPixmap(QtGui.QPixmap(imageList[i]), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.videoControlBtnList[i].setIcon(icon)
             self.videoControlBtnList[i].setIconSize(QtCore.QSize(40, 40))
-            
+        
         self.videoWidget = QtWidgets.QFrame(self.pageList[3])
         self.videoWidget.setGeometry(QtCore.QRect(10, 50, 1280, 720))
         self.videoWidget.setStyleSheet("background-color : rgb(80,80,80);")
+
+        # self.videoLayout = QtWidgets.QVBoxLayout()
+        # self.videoLayout = 

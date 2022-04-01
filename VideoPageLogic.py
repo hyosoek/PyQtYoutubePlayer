@@ -5,11 +5,15 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from Ui import *
 from DataBase import *
 from NewWindow import *
-#from LoadData import *
+from LoadData import *
 #영상 재생을 위해서
+import time
+
+import pafy                                                                                                                                 
+import vlc 
 
 
-class VideoPageLogic(QObject):
+class VideoPageLogic(QObject,threading.Thread):
 
     def __init__(self,Ui,playListCode,userName):
         super().__init__()
@@ -20,9 +24,13 @@ class VideoPageLogic(QObject):
         self.videlDelBtnList = []
         self.videoNameLabelList = []
         self.videoThumbNailList = [] #위젯들
+        self.loadDataList = []
 
-        self.thumbnailImageList = [] #로드해서 저장해줄 곳
-        self.videoNameList = [] #로드해서 저장해줄 곳
+        self.instance = vlc.Instance()
+        self.mediaplayer = self.instance.media_player_new()
+        self.mediaplayer.audio_set_volume(0)
+
+        self.nowPlayingVideoIndex = 0
 
         db = DataBase()
         self.videoData = db.dataRead("video","playlistcode",self.playListCode)
@@ -34,32 +42,14 @@ class VideoPageLogic(QObject):
         self.ui.videoPageidLabel.setText(userName+"님 환영합니다!")
         self.ui.videoPageBtnList[0].clicked.connect(lambda event: self.showPlayList(event))
         self.ui.videoPageBtnList[1].clicked.connect(lambda event: self.addVideoSeq(event))
+        self.ui.videoControlBtnList[0].clicked.connect(lambda event: self.videoPlay(event)) #재생
+        self.ui.videoControlBtnList[1].clicked.connect(lambda event: self.videoPause(event)) #일시정지
+        self.ui.videoControlBtnList[2].clicked.connect(lambda event: self.videoStop(event)) #정지
+        self.ui.volumeSlider.valueChanged[int].connect(self.videoVolume)
         
-    def loadThumbNailTitleData(self,videoCode):
-        try:
-            for i in range(0,len(self.videoData)):
-                if self.videoData[i][2] == videoCode:
-                    index = i
-            url = self.videoData[index][1]
-            video = pafy.new(url)        
+        self.start()
 
-            videoThumbNailUrl  = video.thumb
-            image = QImage()
-            image.loadFromData(requests.get(videoThumbNailUrl).content)
-            self.thumbnailImageList.append(image)
 
-            newLinedTitle = ""
-            oldTitle = video.title
-            for j in range(0,len(oldTitle)):
-                if j%13 == 12:
-                    newLinedTitle += oldTitle[j]
-                    newLinedTitle += "\n"
-                else:
-                    newLinedTitle += oldTitle[j]
-            self.videoNameList.append(newLinedTitle)
-        except:
-            #다시 구현하기
-            pass
 
     def addVideoSeq(self,event):
         self.newAddWindow = NewWindow()
@@ -72,8 +62,6 @@ class VideoPageLogic(QObject):
         flag = False
         try: #유효한 url인가?
             url = self.newAddWindow.inputLineEdit.text()
-            #video = pafy.new(url)
-
             for i in range(0,len(self.videoData)):
                 if self.newAddWindow.inputLineEdit.text() == self.videoData[i][1]: #url 체크
                     flag = True
@@ -88,14 +76,10 @@ class VideoPageLogic(QObject):
                 videoCode = self.videoData[len(self.videoData)-1][2]
                 print(self.videoData)
                 self.addVideo(videoCode)
-                #self.loadThumbNailTitleData(videoCode)
-                self.videoBtnSubWidget(videoCode)
                 self.closeAddWindow()
-
         except:
             self.newAddWindow.warnLabel.setText("Invalid!")
         
-
     def cancelBtnSeq(self,event):
         self.closeAddWindow()
 
@@ -116,7 +100,11 @@ class VideoPageLogic(QObject):
                 "border-radius: 8px;")
         self.ui.videoListVbox.insertWidget(self.ui.videoListVbox.count()-1, videoBtn)
         videoBtn.setObjectName(str(videocode)) #버튼에 비디오 코드로 값을 매겨주면 접근이 편합니다.
-        #videoBtn.mouseReleaseEvent = lambda event: self.loadVideo(event,videoUrl) #url에 접근할때만 사용합니다.
+
+        for i in range(0,len(self.videoData)):
+            if self.videoData[i][2] == videocode:
+                url = self.videoData[i][1]
+        videoBtn.mouseReleaseEvent = lambda event: self.loadVideo(event,videocode)
 
         #영상삭제버튼
         delBtn = QtWidgets.QLabel(videoBtn)
@@ -148,19 +136,10 @@ class VideoPageLogic(QObject):
             if self.videoData[i][2] == videocode:
                 url = self.videoData[i][1]
                 
-        #loadData = LoadData(url,self.thumbNail,self.videoNameLabel)
+        loadData = LoadData(url,self.thumbNail,self.videoNameLabel)
+        self.loadDataList.append(loadData)
 
 
-
-    def videoBtnSubWidget(self,videoCode):
-        try:
-            for i in range(0,len(self.videoData)):
-                if self.videoData[i][2] == videoCode:
-                    index = i    
-            self.videoThumbNailList[index].setPixmap(QPixmap(self.thumbnailImageList[index]))
-            self.videoNameLabelList[index].setText(self.videoNameList[index])
-        except:
-            print("error")
 
 
 
@@ -193,12 +172,49 @@ class VideoPageLogic(QObject):
 
         self.videoBtnList[delIndex].deleteLater()
         del self.videoBtnList[delIndex] #버튼 삭제
-
-        del self.thumbnailImageList[delIndex] #기타 저장소 전부 초기화
-        del self.videoNameList[delIndex]
         del self.videoNameLabelList[delIndex]
         del self.videoThumbNailList[delIndex]
+        del self.loadDataList[delIndex]
+    
+    def loadVideo(self,event,videoCode):
+        self.loadVideoSeq(videoCode)
+
+    def loadVideoSeq(self,videoCode):
+        self.mediaplayer.stop()
+        for i in range(0,len(self.videoData)):
+            if self.videoData[i][2] == videoCode:
+                index = i
+        self.nowPlayingVideoIndex = index
+        playurl = self.loadDataList[index].videoPlayData #인덱스로 접근
+        self.filename = playurl
+        self.media = self.instance.media_new(self.filename)
+        self.mediaplayer.set_media(self.media)
+        self.mediaplayer.set_nsobject(int(self.ui.videoWidget.winId()))
+        self.ui.TitleLabel.setText(self.loadDataList[index].oldtitle)
         
+        self.mediaplayer.video_set_scale(1) #해결못함
+        self.mediaplayer.play()
+        
+    def run(self): #영상 다음거 재생하기
+        while True:
+            if str(self.mediaplayer.get_state()) == "State.Ended" :
+                if self.nowPlayingVideoIndex < len(self.videoData)-1:
+                    self.nowPlayingVideoIndex += 1
+                    nextVideoCode = self.videoData[self.nowPlayingVideoIndex][2]
+                    self.loadVideoSeq(nextVideoCode)
+        
+
+    def videoPause(self,event):
+        self.mediaplayer.pause()
+
+    def videoStop(self,event):
+        self.mediaplayer.stop()
+
+    def videoPlay(self,event):
+        self.mediaplayer.play()
+
+    def videoVolume(self,volumeSize):
+        self.mediaplayer.audio_set_volume(volumeSize)
 
 
     def showPlayList(self,event):
@@ -211,3 +227,6 @@ class VideoPageLogic(QObject):
         del self.videoBtnList
         del self.videlDelBtnList
         del self.videoNameLabelList
+        del self.videoThumbNailList
+        del self.loadDataList
+        self.mediaplayer.stop()

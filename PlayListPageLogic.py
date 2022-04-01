@@ -128,8 +128,8 @@ class PlayListPageLogic(QWidget):
         
 
     def showVideoPage(self,event,playListCode):
-        self.videoPage = VideoPageLogic(self.ui,playListCode,self.userData[0][0])
         self.ui.stackedWidget.setCurrentIndex(3)
+        self.videoPage = VideoPageLogic(self.ui,playListCode,self.userData[0][0])
 
 
     def showSignIn(self,event):
