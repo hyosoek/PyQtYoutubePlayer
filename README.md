@@ -32,3 +32,12 @@ b = 20
 print(a+b)
 ```
 
+플로우차트라는 것도 마크다운을 배우면 좋습니다.
+
+마지막은 테이블입니다.
+
+|순번|이름|이메일|
+|---|---|---|
+|1|최민석|cono@stage.co.kr|
+|2|최효석|tennfin1@naver.co.kr|
+|3|송승헌|bamboo_zero@naver.co.kr|
