@@ -19,13 +19,15 @@ class LoadData(QObject,threading.Thread):
         self.errorExist = False 
         self.videoPlayData = None
         self.oldtitle = None
+        self.resolution = None
 
     def run(self):
         try:            
             video = pafy.new(self.url)                                                                                                 
-            best = video.getbest()                                                                                                                 
+            best = video.getbest()                                                                                                                
             playurl = best.url
-            self.videoPlayData = playurl 
+            self.videoPlayData = playurl
+            self.resolution = best.resolution
 
             videoThumbNailUrl  = video.thumb
             image = QImage()
@@ -42,14 +44,11 @@ class LoadData(QObject,threading.Thread):
                     newLinedTitle += oldTitle[j]
             
             self.thumbNail.setPixmap(QPixmap(image))
-            self.videoNameLabel.setText(newLinedTitle)
+            self.videoNameLabel.setText(newLinedTitle) #시그널 슬롯처리하기
 
 
         except:
             print("??")
             self.errorExist = True
-            
-                
-
-
-    
+            #지금 정상적인 url인데 pafy가 실패하는 예외가 발생해서 일단 해둠
+            #같은 코드인데 진짜 가끔 발생함.

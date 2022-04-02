@@ -31,6 +31,7 @@ class VideoPageLogic(QObject,threading.Thread):
         self.mediaplayer.audio_set_volume(0)
 
         self.nowPlayingVideoIndex = 0
+        self.threadFlag = False
 
         db = DataBase()
         self.videoData = db.dataRead("video","playlistcode",self.playListCode)
@@ -175,6 +176,7 @@ class VideoPageLogic(QObject,threading.Thread):
         del self.videoNameLabelList[delIndex]
         del self.videoThumbNailList[delIndex]
         del self.loadDataList[delIndex]
+        
     
     def loadVideo(self,event,videoCode):
         self.loadVideoSeq(videoCode)
@@ -186,23 +188,40 @@ class VideoPageLogic(QObject,threading.Thread):
                 index = i
         self.nowPlayingVideoIndex = index
         playurl = self.loadDataList[index].videoPlayData #인덱스로 접근
+        
+        resolution = self.loadDataList[index].resolution
+        resolution = str(resolution)
+        checkPoint = False
+        newResoultion = ""
+        for i in range(0,len(resolution)):
+            if resolution[i] == "x":
+                checkPoint = True
+            if checkPoint == False:
+                newResoultion += resolution[i]
+        resolutionRate = 1280/ int(newResoultion)
+
+        print (resolutionRate)
+
         self.filename = playurl
         self.media = self.instance.media_new(self.filename)
         self.mediaplayer.set_media(self.media)
         self.mediaplayer.set_nsobject(int(self.ui.videoWidget.winId()))
         self.ui.TitleLabel.setText(self.loadDataList[index].oldtitle)
         
-        self.mediaplayer.video_set_scale(1) #해결못함
+        self.mediaplayer.video_set_scale(resolutionRate) #해결못함
         self.mediaplayer.play()
         
     def run(self): #영상 다음거 재생하기
         while True:
+            if self.threadFlag == True:
+                break
             if str(self.mediaplayer.get_state()) == "State.Ended" :
                 if self.nowPlayingVideoIndex < len(self.videoData)-1:
                     self.nowPlayingVideoIndex += 1
                     nextVideoCode = self.videoData[self.nowPlayingVideoIndex][2]
                     self.loadVideoSeq(nextVideoCode)
         
+
 
     def videoPause(self,event):
         self.mediaplayer.pause()
@@ -217,6 +236,9 @@ class VideoPageLogic(QObject,threading.Thread):
         self.mediaplayer.audio_set_volume(volumeSize)
 
 
+
+
+
     def showPlayList(self,event):
         self.ui.stackedWidget.setCurrentIndex(2)
         for i in range(0,2):
@@ -229,4 +251,5 @@ class VideoPageLogic(QObject,threading.Thread):
         del self.videoNameLabelList
         del self.videoThumbNailList
         del self.loadDataList
+        self.threadFlag = True
         self.mediaplayer.stop()
