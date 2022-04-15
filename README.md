@@ -42,6 +42,7 @@ print(a+b)
 |2|최효석|tennfin1@naver.co.kr|
 |3|송승헌|bamboo_zero@naver.co.kr|
 |여기에는|다|들어갈 수 있어요(코드빼고)|
+|4|??|???|
 
 하이픈은 데이터 정렬입니다.
 
