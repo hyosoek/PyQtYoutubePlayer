@@ -51,7 +51,6 @@ class VideoPageLogic(QObject,threading.Thread):
         self.start()
 
 
-
     def addVideoSeq(self,event):
         self.newAddWindow = NewWindow()
         self.newAddWindow.addPlayList()
